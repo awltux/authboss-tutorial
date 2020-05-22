@@ -14,6 +14,8 @@ import (
 func configRegistryDefaults() {
 	viper.SetDefault("logging.level", log.WarnLevel.String())
 	viper.SetDefault("logging.output", "stdout")
+	viper.SetDefault("server.host", "localhost")
+	viper.SetDefault("server.port", "8000")
 	viper.SetDefault("routers.home.mount", "/")
 	viper.SetDefault("routers.protected.mount", "protected/")
 	viper.SetDefault("routers.unprotected.mount", "unprotected/")
@@ -23,6 +25,7 @@ func main() {
 	configRegistryInit()
 	loggingInit()
 
+	// application mount points
 	mountPathHome := viper.GetString("routers.home.mount")
 	mountPathProtected := mountPathHome + viper.GetString("routers.protected.mount")
 	mountPathUnprotected := mountPathHome + viper.GetString("routers.unprotected.mount")
@@ -34,7 +37,8 @@ func main() {
 	router.PathPrefix(mountPathHome).HandlerFunc(handlerFuncHome)
 
 	log.Println("http server started")
-	log.Fatal(http.ListenAndServe(":8000", router))
+	serverUrl := viper.GetString("server.host") + ":" + viper.GetString("server.port")
+	log.Fatal(http.ListenAndServe(serverUrl, router))
 
 }
 
