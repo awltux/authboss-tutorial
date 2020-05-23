@@ -2,56 +2,27 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
-// initialize default config values
-func configRegistryDefaults() {
-	viper.SetDefault("logging.level", log.WarnLevel.String())
-	viper.SetDefault("logging.output", "stdout")
-	viper.SetDefault("server.host", "localhost")
-	viper.SetDefault("server.port", "8000")
-	viper.SetDefault("routers.home.mount", "/")
-	viper.SetDefault("routers.protected.mount", "protected/")
-	viper.SetDefault("routers.unprotected.mount", "unprotected/")
-}
+var (
+	configPath = "."
+	configName = "Config"
+	configType = "json"
+)
 
 func main() {
-	configRegistryInit()
-	loggingInit()
+	appName := "web"
+	switch appName {
+	case "webapp":
+		webApp(appName)
+	case "rest":
+		grpcApp(appName)
+	}
 
-	// application mount points
-	mountPathHome := viper.GetString("routers.home.mount")
-	mountPathProtected := mountPathHome + viper.GetString("routers.protected.mount")
-	mountPathUnprotected := mountPathHome + viper.GetString("routers.unprotected.mount")
-
-	router := mux.NewRouter()
-	// Order of adding routes is important
-	router.PathPrefix(mountPathProtected).HandlerFunc(handlerFuncProtected)
-	router.PathPrefix(mountPathUnprotected).HandlerFunc(handlerFuncUnprotected)
-	router.PathPrefix(mountPathHome).HandlerFunc(handlerFuncHome)
-
-	log.Println("http server started")
-	serverUrl := viper.GetString("server.host") + ":" + viper.GetString("server.port")
-	log.Fatal(http.ListenAndServe(serverUrl, router))
-
-}
-
-func handlerFuncHome(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello from home page, %s!", r.URL.Path[1:])
-}
-
-func handlerFuncProtected(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello from protected page, %s!", r.URL.Path[1:])
-}
-
-func handlerFuncUnprotected(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello from unprotected page, %s!", r.URL.Path[1:])
 }
 
 // init should be moved to the application init
@@ -76,27 +47,28 @@ func loggingInit() {
 }
 
 // configInit initilises the Viper config registry
-func configRegistryInit() {
+func configRegistryInit(appName string, registryDefaults func()) {
 	// configure the config
-	viper.SetConfigName("config")
-	viper.AddConfigPath(".")
-	viper.SetConfigType("json")
+	viper.SetConfigName(appName + configName)
+	viper.AddConfigPath(configPath)
+	viper.SetConfigType(configType)
 
-	configRegistryDefaults()
+	registryDefaults()
 
 	// attempt to read the config
-	if err := readConfig(); err != nil {
+	if err := readConfig(appName); err != nil {
 		log.Fatal(fmt.Sprintf("error creating config: %s", err.Error()))
 	}
 }
 
 // readConfig will attempt to read existing config file, if file doesn't exists it will create one with default settings
-func readConfig() error {
+func readConfig(appType string) error {
 	// try to read the config
 	err := viper.ReadInConfig()
 	if err != nil {
+		configFile := appType + configName + "." + configType
 		// write to config if config file does not exists
-		err := viper.WriteConfigAs("config.json")
+		err := viper.WriteConfigAs(configFile)
 		if err != nil {
 			return err
 		}
