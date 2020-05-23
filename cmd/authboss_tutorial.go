@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 
@@ -15,12 +16,16 @@ var (
 )
 
 func main() {
-	appName := "web"
-	switch appName {
-	case "webapp":
-		webApp(appName)
+	appName := flag.String("appName", "web", "Which app to run")
+
+	switch *appName {
+	case "web":
+		WebApp(*appName)
 	case "rest":
-		grpcApp(appName)
+		RestApp(*appName)
+	default:
+		fmt.Printf("Invalid appName: %s", *appName)
+		os.Exit(1)
 	}
 
 }

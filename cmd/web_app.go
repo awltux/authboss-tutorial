@@ -20,7 +20,8 @@ func webRegistryDefaults() {
 	viper.SetDefault("routers.unprotected.mount", "unprotected/")
 }
 
-func webApp(appName string) {
+// WebApp creates simple web app
+func WebApp(appName string) {
 	configRegistryInit(appName, webRegistryDefaults)
 	loggingInit()
 

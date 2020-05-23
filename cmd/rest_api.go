@@ -20,7 +20,8 @@ func restRegistryDefaults() {
 	viper.SetDefault("routers.unprotected.mount", "unprotected/")
 }
 
-func restApp(appName string) {
+// RestApp simple REST API
+func RestApp(appName string) {
 	configRegistryInit(appName, restRegistryDefaults)
 	loggingInit()
 
