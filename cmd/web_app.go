@@ -31,9 +31,9 @@ func webApp(appName string) {
 
 	router := mux.NewRouter()
 	// Order of adding routes is important
-	router.PathPrefix(mountPathProtected).HandlerFunc(handlerFuncProtected)
-	router.PathPrefix(mountPathUnprotected).HandlerFunc(handlerFuncUnprotected)
-	router.PathPrefix(mountPathHome).HandlerFunc(handlerFuncHome)
+	router.PathPrefix(mountPathProtected).HandlerFunc(handlerFuncWebProtected)
+	router.PathPrefix(mountPathUnprotected).HandlerFunc(handlerFuncWebUnprotected)
+	router.PathPrefix(mountPathHome).HandlerFunc(handlerFuncWebHome)
 
 	log.Println("http server started")
 	serverURL := viper.GetString("server.host") + ":" + viper.GetString("server.port")
@@ -41,17 +41,17 @@ func webApp(appName string) {
 
 }
 
-func handlerFuncHome(w http.ResponseWriter, r *http.Request) {
+func handlerFuncWebHome(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello from home page, %s!", r.URL.Path[1:])
 	// Call gRPC uService for data model
 }
 
-func handlerFuncProtected(w http.ResponseWriter, r *http.Request) {
+func handlerFuncWebProtected(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello from protected page, %s!", r.URL.Path[1:])
 	// Call gRPC uService for data model
 }
 
-func handlerFuncUnprotected(w http.ResponseWriter, r *http.Request) {
+func handlerFuncWebUnprotected(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello from unprotected page, %s!", r.URL.Path[1:])
 	// Call gRPC uService for data model
 }
